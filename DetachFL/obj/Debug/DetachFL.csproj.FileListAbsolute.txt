@@ -1,0 +1,5 @@
+D:\Users\PrudnikovVS\Source\Repos\AlignmentShowProf\DetachFL\DetachFL\obj\Debug\DetachFL.csprojResolveAssemblyReference.cache
+D:\Users\PrudnikovVS\Source\Repos\AlignmentShowProf\DetachFL\DetachFL\bin\Debug\DetachFL.dll
+D:\Users\PrudnikovVS\Source\Repos\AlignmentShowProf\DetachFL\DetachFL\bin\Debug\DetachFL.pdb
+D:\Users\PrudnikovVS\Source\Repos\AlignmentShowProf\DetachFL\DetachFL\obj\Debug\DetachFL.dll
+D:\Users\PrudnikovVS\Source\Repos\AlignmentShowProf\DetachFL\DetachFL\obj\Debug\DetachFL.pdb
