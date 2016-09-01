@@ -59,7 +59,7 @@ namespace DetachFL
                         if (fl.Id == brLineId)
                         {
                             //surf.BreaklinesDefinition.RemoveAt(i); // не всегда срабатывает!?
-                            surfCom.Breaklines.Remove(i);
+                            surfCom.Breaklines.Remove(i); 
                             idEntsToAdd.Remove(brLineId);
                             isFind = true;
                         }
