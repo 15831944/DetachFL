@@ -44,9 +44,7 @@ namespace DetachFL
             foreach (ObjectId surfId in surfIds)
             {
                 var surf = surfId.GetObject(OpenMode.ForRead) as TinSurface;
-                IAeccTinSurface surfCom = (IAeccTinSurface)surf.AcadObject;
-                var rettyuy = surf.AcadObject;
-                var tttt = rettyuy.GetType();
+                IAeccTinSurface surfCom = (IAeccTinSurface)surf.AcadObject;                
 
                 for (int i = 0; i < surfCom.Breaklines.Count; i++)
                 {
@@ -60,7 +58,8 @@ namespace DetachFL
                         idEntsToAdd.Add(brLineId);
                         if (fl.Id == brLineId)
                         {
-                            surf.BreaklinesDefinition.RemoveAt(i);
+                            //surf.BreaklinesDefinition.RemoveAt(i); // не всегда срабатывает!?
+                            surfCom.Breaklines.Remove(i);
                             idEntsToAdd.Remove(brLineId);
                             isFind = true;
                         }
