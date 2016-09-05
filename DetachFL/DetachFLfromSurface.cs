@@ -15,23 +15,25 @@ using Autodesk.AutoCAD.Windows;
 
 namespace DetachFL
 {
-    class DetachFLfromSurface
-    {
+    static class DetachFlFromSurface
+    {   
         private const string MenuName = "Удалить ХЛ из поверхности";
         private static RXClass RxClassFeatureLine = RXObject.GetClass(typeof(FeatureLine));
         private static MenuItem Menu;
 
-        public static void AttachContextMenu()
+        public static void AttachContextMenu ()
         {
             var cme = new ContextMenuExtension();
             Menu = new MenuItem(MenuName);
+            Menu.Click += (o, e) => Detach();
             cme.MenuItems.Add(Menu);
             cme.MenuItems.Add(new MenuItem(""));
-            cme.Popup += Cme_Popup;
+            // пока не имеет смысла, нужно найчится проверять принадлежность хар.линии поверхности, без перебора всех поверхностей, только по самой линии
+            //cme.Popup += Cme_Popup;
             Application.AddObjectContextMenuExtension(RxClassFeatureLine, cme);
-        }
+        }       
 
-        private static void Cme_Popup(object sender, EventArgs e)
+        private static void Cme_Popup (object sender, EventArgs e)
         {
             var contextMenu = sender as ContextMenuExtension;
             if (contextMenu != null)
@@ -43,43 +45,32 @@ namespace DetachFL
                 var menu = contextMenu.MenuItems[0];
                 var selImpl = ed.SelectImplied();
 
+                // TODO: проверить принадлежит ли хар.линия какой-либо поверхности. (пока непонятно как это сделать)
+
                 var mVisible = true;
                 var mEnabled = true;
                 if (selImpl.Status == PromptStatus.OK)
                     menu.Enabled = mEnabled;
                 menu.Visible = mVisible;
             }
-        }
+        }        
 
-
-        public class RemoveFL
+        public static void Detach ()
         {
-            Document doc;
-            Database db;
-            Editor ed;
-
-            public RemoveFL(Document doc)
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            var ed = doc.Editor;
+            var civil = CivilApplication.ActiveDocument;
+            var surfIds = civil.GetSurfaceIds();
+            
+            var selRes = ed.SelectImplied();
+            if (selRes.Status != PromptStatus.OK)
             {
-                this.doc = doc;
-                db = doc.Database;
-                ed = doc.Editor;
+                return;
             }
+            List<ObjectId> idsFlToDetach = selRes.Value.GetObjectIds().ToList();
 
-            public void Test()
+            using (var t = doc.TransactionManager.StartTransaction())
             {
-                var civil = CivilApplication.ActiveDocument;
-                var surfIds = civil.GetSurfaceIds();
-
-                var selOPt = new PromptEntityOptions("\nВыбери хар линию");
-                selOPt.SetRejectMessage("\nТолько хар линию");
-                selOPt.AddAllowedClass(typeof(FeatureLine), true);
-                var selRes = ed.GetEntity(selOPt);
-                if (selRes.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var fl = selRes.ObjectId.GetObject(OpenMode.ForRead) as FeatureLine;
-
                 foreach (ObjectId surfId in surfIds)
                 {
                     var surf = surfId.GetObject(OpenMode.ForRead) as TinSurface;
@@ -89,37 +80,38 @@ namespace DetachFL
                     {
                         var brLine = surfCom.Breaklines.Item(i);
                         var brLineEnts = (object[])brLine.BreaklineEntities;
-                        List<ObjectId> idEntsToAdd = new List<ObjectId>();
+                        List<ObjectId> idBreaklinesToAdd = new List<ObjectId>();
                         bool isFind = false;
                         for (int b = 0; b < brLineEnts.Length; b++)
                         {
                             var brLineId = Autodesk.AutoCAD.DatabaseServices.DBObject.FromAcadObject(brLineEnts[b]);
-                            idEntsToAdd.Add(brLineId);
-                            if (fl.Id == brLineId)
+                            idBreaklinesToAdd.Add(brLineId);
+                            if (idsFlToDetach.Contains(brLineId))
                             {
                                 //surf.BreaklinesDefinition.RemoveAt(i); // не всегда срабатывает!?
                                 surfCom.Breaklines.Remove(i);
-                                idEntsToAdd.Remove(brLineId);
+                                idBreaklinesToAdd.Remove(brLineId);
                                 isFind = true;
                             }
                         }
                         if (isFind)
                         {
-                            if (idEntsToAdd.Any())
+                            if (idBreaklinesToAdd.Any())
                             {
-                                AddOperToSurf(surf, idEntsToAdd);
+                                AddBreaklinesToSurface(surf, idBreaklinesToAdd);
                             }
                             return;
                         }
                     }
                 }
+                t.Commit();
             }
+        }
 
-            private void AddOperToSurf(TinSurface surf, List<ObjectId> idEntsToAdd)
-            {
-                ObjectIdCollection ids = new ObjectIdCollection(idEntsToAdd.ToArray());
-                surf.BreaklinesDefinition.AddStandardBreaklines(ids, 0.1, 0, 0, 0);
-            }
+        private static void AddBreaklinesToSurface (TinSurface surf, List<ObjectId> idEntsToAdd)
+        {
+            ObjectIdCollection ids = new ObjectIdCollection(idEntsToAdd.ToArray());
+            surf.BreaklinesDefinition.AddStandardBreaklines(ids, 0.1, 0, 0, 0);
         }
     }
 }
