@@ -46,6 +46,7 @@ namespace DetachFL
                 var selImpl = ed.SelectImplied();
 
                 // TODO: проверить принадлежит ли хар.линия какой-либо поверхности. (пока непонятно как это сделать)
+                
 
                 var mVisible = true;
                 var mEnabled = true;
@@ -99,8 +100,7 @@ namespace DetachFL
                             if (idBreaklinesToAdd.Any())
                             {
                                 AddBreaklinesToSurface(surf, idBreaklinesToAdd);
-                            }
-                            return;
+                            }                            
                         }
                     }
                 }
