@@ -70,9 +70,11 @@ namespace DetachFL
             }
             List<ObjectId> idsFlToDetach = selRes.Value.GetObjectIds().ToList();
             List<ObjectId> idsFlDetached = new List<ObjectId>();
+            List<ObjectId> idsEditedSurf = new List<ObjectId>();
 
             using (var t = doc.TransactionManager.StartTransaction())
             {
+                bool isEditedSurf = false;
                 foreach (ObjectId surfId in surfIds)
                 {
                     var surf = surfId.GetObject(OpenMode.ForRead) as TinSurface;
@@ -99,17 +101,32 @@ namespace DetachFL
                         }
                         if (isFind)
                         {
+                            isEditedSurf = true;
                             if (idBreaklinesToAdd.Any())
                             {
                                 AddBreaklinesToSurface(surf, idBreaklinesToAdd);
                             }                            
                         }
                     }
+                    if (isEditedSurf)
+                    {
+                        idsEditedSurf.Add(surfId);
+                    }
                 }
 
                 // Изменение стиля характерной линии
-                StyleHelper.Change(idsFlDetached, "Удаленные из поверхности");
+                StyleHelper.Change(idsFlDetached, "Удаленные из поверхности");               
 
+                t.Commit();
+            }
+
+            // Перестройка поверхностей
+            using (var t = doc.TransactionManager.StartTransaction())
+            {
+                foreach (var idSurf in idsEditedSurf)
+                {
+
+                }
                 t.Commit();
             }
         }
