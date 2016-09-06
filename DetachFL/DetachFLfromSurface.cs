@@ -69,6 +69,7 @@ namespace DetachFL
                 return;
             }
             List<ObjectId> idsFlToDetach = selRes.Value.GetObjectIds().ToList();
+            List<ObjectId> idsFlDetached = new List<ObjectId>();
 
             using (var t = doc.TransactionManager.StartTransaction())
             {
@@ -93,6 +94,7 @@ namespace DetachFL
                                 surfCom.Breaklines.Remove(i);
                                 idBreaklinesToAdd.Remove(brLineId);
                                 isFind = true;
+                                idsFlDetached.Add(brLineId);
                             }
                         }
                         if (isFind)
@@ -104,6 +106,10 @@ namespace DetachFL
                         }
                     }
                 }
+
+                // Изменение стиля характерной линии
+                StyleHelper.Change(idsFlDetached, "Удаленные из поверхности");
+
                 t.Commit();
             }
         }
@@ -112,6 +118,12 @@ namespace DetachFL
         {
             ObjectIdCollection ids = new ObjectIdCollection(idEntsToAdd.ToArray());
             surf.BreaklinesDefinition.AddStandardBreaklines(ids, 0.1, 0, 0, 0);
+            surf.Rebuild();
+            }
+
+      
         }
     }
-}
+        
+
+ 
