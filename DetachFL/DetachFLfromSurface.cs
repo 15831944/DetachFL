@@ -125,7 +125,8 @@ namespace DetachFL
             {
                 foreach (var idSurf in idsEditedSurf)
                 {
-
+                    TinSurface surface = idSurf.GetObject(OpenMode.ForWrite) as TinSurface;
+                    surface.Rebuild();
                 }
                 t.Commit();
             }
@@ -135,8 +136,7 @@ namespace DetachFL
         {
             ObjectIdCollection ids = new ObjectIdCollection(idEntsToAdd.ToArray());
             surf.BreaklinesDefinition.AddStandardBreaklines(ids, 0.1, 0, 0, 0);
-            surf.Rebuild();
-            }
+           }
 
       
         }
