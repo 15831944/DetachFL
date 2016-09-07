@@ -110,6 +110,7 @@ namespace DetachFL
                     }
                     if (isEditedSurf)
                     {
+                        isEditedSurf = false;
                         idsEditedSurf.Add(surfId);
                     }
                 }
