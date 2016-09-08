@@ -16,19 +16,22 @@ using Autodesk.AutoCAD.Windows;
 namespace DetachFL
 {
     static class DetachFlFromSurface
-    {   
+    {   // Присваиваем название строке меню
+        // Указываем объекты, при выборе которых появляется строка меню
         private const string MenuName = "Удалить ХЛ из поверхности";
         private static RXClass RxClassFeatureLine = RXObject.GetClass(typeof(FeatureLine));
         private static MenuItem Menu;
 
         public static void AttachContextMenu ()
         {
+            // Стандартное описание процесса добавления строки меню, не понятно где ты объявил метод Detach? Можешь тут ответить, имею ввиду почему в сокращенном виде - просто Deatch?
+            // Поглядел дальше - там и объявлен? Бля...у меня из-за этого вынос мозга))) Указали что делать по щелчку, не объяснив заранее как это делать...Типа сделай это, но я потом расскажу как) Или это компилятор потом в порядок приводит? Который JIT, сегодня новое слово узнал)))
             var cme = new ContextMenuExtension();
             Menu = new MenuItem(MenuName);
             Menu.Click += (o, e) => Detach();
             cme.MenuItems.Add(Menu);
             cme.MenuItems.Add(new MenuItem(""));
-            // пока не имеет смысла, нужно найчится проверять принадлежность хар.линии поверхности, без перебора всех поверхностей, только по самой линии
+            // пока не имеет смысла, нужно научиться проверять принадлежность хар.линии к поверхности, без перебора всех поверхностей, только по самой линии
             //cme.Popup += Cme_Popup;
             Application.AddObjectContextMenuExtension(RxClassFeatureLine, cme);
         }       
@@ -132,7 +135,11 @@ namespace DetachFL
                 t.Commit();
             }
         }
-
+        /// <summary>
+        //// Возвращаем невыбранные пользователем ХЛ обратно в исходную поверхность. Возвращаются ХЛ, которые были в одной операции добавления в поверхность.
+        /// </summary>
+        /// <param name="surf"></param>
+        /// <param name="idEntsToAdd"></param>
         private static void AddBreaklinesToSurface (TinSurface surf, List<ObjectId> idEntsToAdd)
         {
             ObjectIdCollection ids = new ObjectIdCollection(idEntsToAdd.ToArray());
